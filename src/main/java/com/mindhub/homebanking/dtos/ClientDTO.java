@@ -10,12 +10,14 @@ public class ClientDTO {
     private String lastName;
     private String email;
     private Set<AccountDTO> accounts;
+    private Set<ClientLoanDTO> loans;
     public ClientDTO(Client client) {
         this.id = client.getId();
         this.firstName = client.getFirstName();
         this.lastName = client.getLastName();
         this.email = client.getEmail();
         this.accounts = client.getAccounts().stream().map(AccountDTO::new).collect(Collectors.toSet());
+        this.loans = client.getClientLoans().stream().map(ClientLoanDTO::new).collect(Collectors.toSet());
     }
 
     public Long getId() {
@@ -36,5 +38,9 @@ public class ClientDTO {
 
     public Set<AccountDTO> getAccounts() {
         return accounts;
+    }
+
+    public Set<ClientLoanDTO> getLoans() {
+        return loans;
     }
 }
