@@ -20,8 +20,7 @@ public class HomebankingApplication {
 	}
 
 	@Bean
-	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository,
-									  TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository){
+	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository, CardRepository cardRepository){
 		return (args) -> {
 			Client melba = new Client("Melba", "Morel", "melba@mindhub.com");
 			Client client2 = new Client("Pepe", "Morel", "pepe@email.com");
@@ -49,7 +48,7 @@ public class HomebankingApplication {
 			account1.addTransactions(transaction1);
 			account2.addTransactions(transaction2);
 			account2.addTransactions(transaction3);
-			account1.addTransactions(transaction4);
+			account3.addTransactions(transaction4);
 
 			transactionRepository.save(transaction1);
 			transactionRepository.save(transaction2);
@@ -71,6 +70,7 @@ public class HomebankingApplication {
 			mortgage.addClientLoan(clientMelba1);
 			personal.addClientLoan(clientMelba2);
 			personal.addClientLoan(clientLoan1);
+
 			melba.addClientLoan(clientMelba1);
 			melba.addClientLoan(clientMelba2);
 			client2.addClientLoan(clientLoan1);
@@ -79,7 +79,17 @@ public class HomebankingApplication {
 			clientLoanRepository.save(clientMelba2);
 			clientLoanRepository.save(clientLoan1);
 
+			Card cardGoldMelba = new Card(melba.getFirstName() + " " + melba.getLastName(), CardType.DEBIT, CardColor.GOLD, "4579-5589-1134-5079", 899, LocalDateTime.now(), LocalDateTime.now().plusYears(5));
+			Card cardTitaniumMelba = new Card(melba.getFirstName() + " " + melba.getLastName(), CardType.CREDIT, CardColor.TITANIUM, "4789-5100-5234-7083", 736, LocalDateTime.now(), LocalDateTime.now().plusYears(5));
+			Card cardSilverPepe = new Card(client2.getFirstName() + " " + client2.getLastName(), CardType.CREDIT, CardColor.SILVER, "3719-0034-1904-4436", 830, LocalDateTime.now(), LocalDateTime.now().plusYears(5));
 
+			melba.addCards(cardGoldMelba);
+			melba.addCards(cardTitaniumMelba);
+			client2.addCards(cardSilverPepe);
+
+			cardRepository.save(cardGoldMelba);
+			cardRepository.save(cardTitaniumMelba);
+			cardRepository.save(cardSilverPepe);
 
 		};
 	}
