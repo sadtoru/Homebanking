@@ -2,10 +2,12 @@ package com.mindhub.homebanking;
 
 import com.mindhub.homebanking.models.*;
 import com.mindhub.homebanking.repositories.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +16,8 @@ import java.util.List;
 
 @SpringBootApplication
 public class HomebankingApplication {
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	public static void main(String[] args) {
 		SpringApplication.run(HomebankingApplication.class, args);
@@ -22,8 +26,9 @@ public class HomebankingApplication {
 	@Bean
 	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository, CardRepository cardRepository){
 		return (args) -> {
-			Client melba = new Client("Melba", "Morel", "melba@mindhub.com");
-			Client client2 = new Client("Pepe", "Morel", "pepe@email.com");
+			Client melba = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("asd1234"));
+			Client client2 = new Client("Pepe", "Morel", "pepe@email.com", passwordEncoder.encode("asd4321"));
+			Client admin = new Client("Admin", "Admin", "admin@admin.com", passwordEncoder.encode("admin123"));
 
 			Account account1 = new Account("VIN001", LocalDate.now(), 5000.00);
 			Account account2 = new Account("VIN002", LocalDate.now().plusDays(1), 7500.00);
@@ -31,6 +36,7 @@ public class HomebankingApplication {
 
 			clientRepository.save(melba);
 			clientRepository.save(client2);
+			clientRepository.save(admin);
 
 			melba.addAccount(account1);
 			melba.addAccount(account2);
@@ -55,29 +61,29 @@ public class HomebankingApplication {
 			transactionRepository.save(transaction3);
 			transactionRepository.save(transaction4);
 
-			Loan mortgage = new Loan("Mortgage", 500000.00, List.of(12,24,36,48,60));
-			Loan personal = new Loan("Personal", 100000.00, List.of(6,12,24));
-			Loan automotive = new Loan("Automotive", 300000.00, List.of(6,12,24,36));
+			Loan loanMortgage = new Loan("Mortgage", 500000.00, List.of(12,24,36,48,60));
+			Loan loanPersonal = new Loan("Personal", 100000.00, List.of(6,12,24));
+			Loan loanAutomotive = new Loan("Automotive", 300000.00, List.of(6,12,24,36));
 
-			loanRepository.save(mortgage);
-			loanRepository.save(personal);
-			loanRepository.save(automotive);
+			loanRepository.save(loanMortgage);
+			loanRepository.save(loanPersonal);
+			loanRepository.save(loanAutomotive);
 
-			ClientLoan clientMelba1 = new ClientLoan(400000.00,60);
-			ClientLoan clientMelba2 = new ClientLoan(50000.00,12);
-			ClientLoan clientLoan1 = new ClientLoan(100000.00,24);
+			ClientLoan loanMelba1 = new ClientLoan(400000.00,60);
+			ClientLoan loanMelba2 = new ClientLoan(50000.00,12);
+			ClientLoan loanPepe1 = new ClientLoan(100000.00,24);
 
-			mortgage.addClientLoan(clientMelba1);
-			personal.addClientLoan(clientMelba2);
-			personal.addClientLoan(clientLoan1);
+			loanMortgage.addClientLoan(loanMelba1);
+			loanPersonal.addClientLoan(loanMelba2);
+			loanPersonal.addClientLoan(loanPepe1);
 
-			melba.addClientLoan(clientMelba1);
-			melba.addClientLoan(clientMelba2);
-			client2.addClientLoan(clientLoan1);
+			melba.addClientLoan(loanMelba1);
+			melba.addClientLoan(loanMelba2);
+			client2.addClientLoan(loanPepe1);
 
-			clientLoanRepository.save(clientMelba1);
-			clientLoanRepository.save(clientMelba2);
-			clientLoanRepository.save(clientLoan1);
+			clientLoanRepository.save(loanMelba1);
+			clientLoanRepository.save(loanMelba2);
+			clientLoanRepository.save(loanPepe1);
 
 			Card cardGoldMelba = new Card(melba.getFirstName() + " " + melba.getLastName(), CardType.DEBIT, CardColor.GOLD, "4579-5589-1134-5079", 899, LocalDateTime.now(), LocalDateTime.now().plusYears(5));
 			Card cardTitaniumMelba = new Card(melba.getFirstName() + " " + melba.getLastName(), CardType.CREDIT, CardColor.TITANIUM, "4789-5100-5234-7083", 736, LocalDateTime.now(), LocalDateTime.now().plusYears(5));
