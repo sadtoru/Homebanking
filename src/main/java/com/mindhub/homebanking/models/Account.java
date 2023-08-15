@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 @Entity
@@ -27,6 +28,23 @@ public class Account {
 
 
     public Account() {
+    }
+    public Account(String number) {
+        this.number = number;
+        this.date = LocalDate.now();
+        this.balance = 0.0;
+    }
+
+    public Account(String number, Double balance) {
+        this.number = number;
+        this.date = LocalDate.now();
+        this.balance = balance;
+    }
+
+    public Account(LocalDate creationDate, Double balance) {
+        this.number = "VIN-" + ThreadLocalRandom.current().nextInt(100000,999999 +1);
+        this.date = creationDate;
+        this.balance = balance;
     }
 
     public Account(String number, LocalDate date, Double balance) {
