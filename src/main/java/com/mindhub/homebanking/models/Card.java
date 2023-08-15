@@ -3,6 +3,7 @@ package com.mindhub.homebanking.models;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,6 +24,15 @@ public class Card {
     private Client clientCard;
 
     public Card() {
+    }
+    public Card(String cardHolder, CardType type, CardColor color, String number, int cvv) {
+        this.cardHolder = cardHolder;
+        this.type = type;
+        this.color = color;
+        this.number = number;
+        this.cvv = cvv;
+        this.thruDate = LocalDateTime.now().plusYears(5);
+        this.fromDate = LocalDateTime.now();
     }
 
     public Card(String cardHolder, CardType type, CardColor color, String number, int cvv, LocalDateTime fromDate, LocalDateTime thruDate) {
