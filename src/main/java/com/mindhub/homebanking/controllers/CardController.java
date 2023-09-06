@@ -8,6 +8,8 @@ import com.mindhub.homebanking.models.CardType;
 import com.mindhub.homebanking.models.Client;
 import com.mindhub.homebanking.repositories.CardRepository;
 import com.mindhub.homebanking.repositories.ClientRepository;
+import com.mindhub.homebanking.services.CardService;
+import com.mindhub.homebanking.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,65 +27,44 @@ import java.util.stream.Collectors;
 @RequestMapping("/api")
 public class CardController {
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
+    @Autowired
+    private CardService cardService;
     @Autowired
     private CardRepository cardRepository;
     @RequestMapping(value = "/clients/current/cards", method = RequestMethod.POST)
-        public ResponseEntity<Object> newCard(
-                @RequestParam CardType cardType, @RequestParam CardColor cardColor, Authentication auth){
-            Client client =  clientRepository.findByEmail(auth.getName());
-            int cvv = (int)Math.floor(Math.random()*999-111)+111;
-            String cardNumber = String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999 + 1));
+        public ResponseEntity<Object> applyForNewCard(
+                @RequestParam CardType cardType, @RequestParam CardColor cardColor, Authentication auth) {
+        Client client = clientService.findByEmail(auth.getName());
+        int cvv = (int) Math.floor(Math.random() * 999 - 111) + 111;
+        String cardNumber = String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999 + 1));
 
-            do{
-                for (int i = 0; i < 3; i++) {
-                    String random = String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999 + 1));
-                    cardNumber = cardNumber.concat("-").concat(random);
-                }
-            }while (cardRepository.findByNumber(cardNumber) != null);
-
-            boolean hasDebit = client.getCards().stream().filter(card -> card.getType() == CardType.DEBIT).count() <= 3;
-            boolean hasCredit = client.getCards().stream().filter(card -> card.getType() == CardType.CREDIT).count() <= 3;
-            boolean hasColorCredit = client.getCards().stream().anyMatch(card -> card.getColor() == cardColor &&  card.getType().equals(CardType.CREDIT));
-            boolean hasColorDebit = client.getCards().stream().anyMatch(card -> card.getColor() == cardColor && card.getType().equals(CardType.DEBIT));
-
-            if (cardType.equals(CardType.CREDIT)){
-                if (hasCredit) {
-                    if (hasColorCredit) {
-                        return new ResponseEntity<>("You already have a " + cardColor + " credit card.", HttpStatus.FORBIDDEN);
-                    } else {
-                        Card card = new Card(client.getFirstName() + " " + client.getLastName(), cardType, cardColor, cardNumber, cvv);
-                        client.addCards(card);
-                        cardRepository.save(card);
-                        return new ResponseEntity<>("A new credit card has been created.", HttpStatus.CREATED);
-                    }
-                }else{
-                    return new ResponseEntity<>("You have reached the credit card limit.", HttpStatus.FORBIDDEN);
-                }
-
-            } else if (cardType.equals(CardType.DEBIT)) {
-                if (hasDebit) {
-                    if (hasColorDebit) {
-                        return new ResponseEntity<>("You already have a " + cardColor + " credit card.", HttpStatus.FORBIDDEN);
-                    } else {
-                        Card card = new Card(client.getFirstName() + " " + client.getLastName(), cardType, cardColor, cardNumber, cvv);
-                        client.addCards(card);
-                        cardRepository.save(card);
-                        return new ResponseEntity<>("A new debit card has been created.", HttpStatus.CREATED);
-                    }
-                }else{
-                    return new ResponseEntity<>("You have reached the credit card limit.", HttpStatus.FORBIDDEN);
-                }
-
-            }else {
-                return new ResponseEntity<>("You have reached the cards limit.", HttpStatus.FORBIDDEN);
+        do {
+            for (int i = 0; i < 3; i++) {
+                String random = String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999 + 1));
+                cardNumber = cardNumber.concat("-").concat(random);
             }
+        } while (cardService.findByNumber(cardNumber) != null);
 
+        List<Card> cardListClient = cardService.findByClientCardAndTypeAndColors(client, cardType, cardColor);
+
+        if (cardListClient.size() <= 3) {
+            boolean hasCardColor = cardListClient.stream().anyMatch(card -> card.getColor().equals(cardColor));
+            if (hasCardColor) {
+                return new ResponseEntity<>("You already have a " + cardColor + " " + cardType + " card", HttpStatus.FORBIDDEN);
+            }
+            Card card = new Card(client.getFirstName() + " " + client.getLastName(), cardType, cardColor, cardNumber, cvv);
+            client.addCards(card);
+            cardService.save(card);
+            return new ResponseEntity<>("A new " + cardType + " card has been created.", HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>("You have reached the cards limit.", HttpStatus.FORBIDDEN);
         }
+}
 
     @RequestMapping(value = "/clients/current/cards", method = RequestMethod.GET)
     public List<CardDTO> getCards(Authentication auth){
-        return clientRepository.findByEmail(auth.getName()).getCards().stream().map(card -> new CardDTO(card)).collect(Collectors.toList());
+        return clientService.findByEmail(auth.getName()).getCards().stream().map(card -> new CardDTO(card)).collect(Collectors.toList());
     }
 
 }

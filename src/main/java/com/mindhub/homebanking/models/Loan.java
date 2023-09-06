@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 @Entity
 public class Loan {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")

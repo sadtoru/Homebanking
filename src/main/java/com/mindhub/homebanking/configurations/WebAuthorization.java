@@ -20,7 +20,7 @@ public class WebAuthorization {
         http.authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/api/clients", "/api/login", "/api/logout").permitAll()
                 .antMatchers("/web/index.html", "/web/css/**", "/web/img/**", "/web/js/**").permitAll()
-                .antMatchers("/web/**").hasAnyAuthority("CLIENT", "ADMIN")
+                .antMatchers("/web/**", "/api/**").hasAnyAuthority("CLIENT", "ADMIN")
                 .antMatchers(HttpMethod.GET, "/api/clients").hasAuthority("ADMIN")
                 .antMatchers("/rest/**", "/manager.html", "/h2-console").hasAuthority("ADMIN")
                 .antMatchers(HttpMethod.POST, "/api/cards", "/api/transactions", "/api/accounts").hasAuthority("CLIENT");
