@@ -23,7 +23,7 @@ public class HomebankingApplication {
 		SpringApplication.run(HomebankingApplication.class, args);
 	}
 
-	@Bean
+/*	@Bean
 	public CommandLineRunner initData(ClientRepository clientRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, LoanRepository loanRepository, ClientLoanRepository clientLoanRepository, CardRepository cardRepository){
 		return (args) -> {
 			Client melba = new Client("Melba", "Morel", "melba@mindhub.com", passwordEncoder.encode("asd1234"));
@@ -98,6 +98,6 @@ public class HomebankingApplication {
 			cardRepository.save(cardSilverPepe);
 
 		};
-	}
+	}*/
 
 }
