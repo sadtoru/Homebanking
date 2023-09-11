@@ -16,6 +16,7 @@ import java.util.List;
 
 @SpringBootApplication
 public class HomebankingApplication {
+
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
